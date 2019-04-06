@@ -124,7 +124,29 @@ var getLogger = function(moduleName) {
 	return logger;
 };
 
+var getKey = function(username, userOrg)  {
+	var org;
+	if (userOrg = "org1"){
+		org = "Org1";
+	}else if (userOrg ="org2"){
+		org = "Org2";
+	}
+	var file="/tmp/fabric-client-kvs_peer"+org+"\/"+username;
+	var user=JSON.parse(fs.readFileSync( file));
+	var signingIdentity = user.enrollment.signingIdentity;
+	var certPEM = user.enrollment.identity.certificate.toString();
+	var keyPath = "/tmp/fabric-client-kvs_peer"+org+"\/"+signingIdentity+'-priv';
+	var keyPEM = fs.readFileSync(keyPath).toString();
+	var cryptoContent = {
+		privateKeyPEM: keyPEM,
+		signedCertPEM: certPEM,
+	};
+	return cryptoContent;
+
+};
+
 exports.getClientForOrg = getClientForOrg;
 exports.getLogger = getLogger;
 exports.setupChaincodeDeploy = setupChaincodeDeploy;
+exports.getKey = getKey;
 exports.getRegisteredUser = getRegisteredUser;

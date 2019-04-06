@@ -337,6 +337,12 @@ app.get('/channels/:channelName/chaincodes/:chaincodeName', async function(req, 
 		res.json(getErrorMessage('\'args\''));
 		return;
 	}
+	if (fcn == "downloadKey"){
+		var cryptoContent = helper.getKey(req.username,req.orgname);
+		var key = cryptoContent.privateKeyPEM;
+		res.send(key);
+	}
+
 	args = args.replace(/'/g, '"');
 	args = JSON.parse(args);
 	logger.debug(args);
