@@ -40,7 +40,7 @@ function setChaincodePath(){
 	LANGUAGE=`echo "$LANGUAGE" | tr '[:upper:]' '[:lower:]'`
 	case "$LANGUAGE" in
 		"golang")
-		CC_SRC_PATH="github.com/medicine_chain_cc/go"
+		CC_SRC_PATH="github.com/quality_certification_cc/go"
 		;;
 		*) printf "\n ------ Language $LANGUAGE is not supported yet ------\n"$
 		exit 1
@@ -230,32 +230,32 @@ curl -s -X POST \
 echo
 echo
 
-echo "POST invoke chaincode on peers of Org1, Org2 and Org3"
-echo
-VALUES=$(curl -s -X POST \
-  http://localhost:4000/channels/mychannel/chaincodes/mycc \
-  -H "authorization: Bearer $ORG1_TOKEN" \
-  -H "content-type: application/json" \
-  -d "{
-	\"peers\": [\"peer0.org1.example.com\",\"peer0.org2.example.com\",\"peer0.org3.example.com\"],
-	\"fcn\":\"move\",
-	\"args\":[\"a\",\"b\",\"10\"]
-}")
-echo $VALUES
-MESSAGE=$(echo $VALUES | jq -r ".message")
-TRX_ID=${MESSAGE#*ID:}
-echo $TRX_ID
-echo
-
-
-echo "GET query chaincode on peer1 of Org1"
-echo
-curl -s -X GET \
-  "http://localhost:4000/channels/mychannel/chaincodes/mycc?peer=peer0.org1.example.com&fcn=query&args=%5B%22a%22%5D" \
-  -H "authorization: Bearer $ORG1_TOKEN" \
-  -H "content-type: application/json"
-echo
-echo
+#echo "POST invoke chaincode on peers of Org1, Org2 and Org3"
+#echo
+#VALUES=$(curl -s -X POST \
+#  http://localhost:4000/channels/mychannel/chaincodes/mycc \
+#  -H "authorization: Bearer $ORG1_TOKEN" \
+#  -H "content-type: application/json" \
+#  -d "{
+#	\"peers\": [\"peer0.org1.example.com\",\"peer0.org2.example.com\",\"peer0.org3.example.com\"],
+#	\"fcn\":\"move\",
+#	\"args\":[\"a\",\"b\",\"10\"]
+#}")
+#echo $VALUES
+#MESSAGE=$(echo $VALUES | jq -r ".message")
+#TRX_ID=${MESSAGE#*ID:}
+#echo $TRX_ID
+#echo
+#
+#
+#echo "GET query chaincode on peer1 of Org1"
+#echo
+#curl -s -X GET \
+#  "http://localhost:4000/channels/mychannel/chaincodes/mycc?peer=peer0.org1.example.com&fcn=query&args=%5B%22a%22%5D" \
+#  -H "authorization: Bearer $ORG1_TOKEN" \
+#  -H "content-type: application/json"
+#echo
+#echo
 
 echo "GET query Block by blockNumber"
 echo
