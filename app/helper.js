@@ -20,6 +20,7 @@ logger.setLevel('DEBUG');
 
 var path = require('path');
 var util = require('util');
+var fs = require('fs-extra');
 
 var hfc = require('fabric-client');
 hfc.setLogger(logger);
@@ -130,12 +131,14 @@ var getKey = function(username, userOrg)  {
 		org = "Org1";
 	}else if (userOrg ="org2"){
 		org = "Org2";
-	}
-	var file="/tmp/fabric-client-kvs_peer"+org+"\/"+username;
+	}else if (userOrg = "org3"){
+                org = "Org3";
+        }
+	var file="/root/quality-certification-chain/fabric-client-kv-"+org+"\/"+username;
 	var user=JSON.parse(fs.readFileSync( file));
 	var signingIdentity = user.enrollment.signingIdentity;
 	var certPEM = user.enrollment.identity.certificate.toString();
-	var keyPath = "/tmp/fabric-client-kvs_peer"+org+"\/"+signingIdentity+'-priv';
+	var keyPath = "/tmp/fabric-client-kv-"+org+"\/"+signingIdentity+'-priv';
 	var keyPEM = fs.readFileSync(keyPath).toString();
 	var cryptoContent = {
 		privateKeyPEM: keyPEM,
