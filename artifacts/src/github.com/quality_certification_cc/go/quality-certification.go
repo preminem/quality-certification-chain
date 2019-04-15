@@ -2,17 +2,18 @@ package main
 
 import (
 	"bytes"
-	"crypto/ecdsa"
-	"crypto/sha256"
+	//"crypto/ecdsa"
+	//"crypto/sha256"
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	sc "github.com/hyperledger/fabric/protos/peer"
-        "github.com/quality_certification_cc/go/model"
-	"math/big"
-	"strings"
+	"github.com/quality_certification_cc/go/model"
+	//"github.com/preminem/quality-certification-chain/artifacts/src/github.com/quality_certification_cc/go/model"
+	//"math/big"
+	//"strings"
 )
 
 // Define the Smart Contract structure
@@ -161,8 +162,8 @@ func (s *SmartContract) certApplication(APIstub shim.ChaincodeStubInterface, arg
 		return shim.Error("Incorrect number of arguments. Expecting 5")
 	}
 	//验证签名
-	var m, n big.Int
-	var rr, ss *big.Int
+	//var m, n big.Int
+	//var rr, ss *big.Int
 	creatorByte, _ := APIstub.GetCreator()
 	block, _ := pem.Decode(creatorByte)
 	if block == nil {
@@ -172,29 +173,29 @@ func (s *SmartContract) certApplication(APIstub shim.ChaincodeStubInterface, arg
 	if err != nil {
 		return shim.Error("x509 parse err!")
 	}
-	pub := cert.PublicKey.(*ecdsa.PublicKey)
-	h2 := sha256.New()
-	h2.Write([]byte(args[0]))
-	hashed := h2.Sum(nil)
-	arr := strings.Split(args[5], ",")
-	m.SetString(arr[0], 10) //大于int64的数字要用到SetString函数
-	n.SetString(arr[1], 10)
-	rr = &m
-	ss = &n
-	result := ecdsa.Verify(pub, hashed, rr, ss)
-	if result != true {
-		return shim.Error("ECDSA Verification failed")
-	}
+	//pub := cert.PublicKey.(*ecdsa.PublicKey)
+	//h2 := sha256.New()
+	//h2.Write([]byte(args[0]))
+	//hashed := h2.Sum(nil)
+	//arr := strings.Split(args[5], ",")
+	//m.SetString(arr[0], 10) //大于int64的数字要用到SetString函数
+	//n.SetString(arr[1], 10)
+	//rr = &m
+	//ss = &n
+	//result := ecdsa.Verify(pub, hashed, rr, ss)
+	//if result != true {
+	//	return shim.Error("ECDSA Verification failed")
+	//}
 
-	certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
-	if certStart == -1 {
-		return shim.Error("No certificate found")
-	}
-	certText := creatorByte[certStart:]
-	bl, _ := pem.Decode(certText)
-	if bl == nil {
-		return shim.Error("Could not decode the PEM structure")
-	}
+	//certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
+	//if certStart == -1 {
+	//	return shim.Error("No certificate found")
+	//}
+	//certText := creatorByte[certStart:]
+	//bl, _ := pem.Decode(certText)
+	//if bl == nil {
+	//	return shim.Error("Could not decode the PEM structure")
+	//}
 
 	uname := cert.Subject.CommonName
 
@@ -214,8 +215,8 @@ func (s *SmartContract) docAudit(APIstub shim.ChaincodeStubInterface, args []str
 		return shim.Error("Incorrect number of arguments. Expecting 2")
 	}
 	//验证签名
-	var m, n big.Int
-	var rr, ss *big.Int
+	//var m, n big.Int
+	//var rr, ss *big.Int
 	creatorByte, _ := APIstub.GetCreator()
 	block, _ := pem.Decode(creatorByte)
 	if block == nil {
@@ -225,29 +226,29 @@ func (s *SmartContract) docAudit(APIstub shim.ChaincodeStubInterface, args []str
 	if err != nil {
 		return shim.Error("x509 parse err!")
 	}
-	pub := cert.PublicKey.(*ecdsa.PublicKey)
-	h2 := sha256.New()
-	h2.Write([]byte(args[0]))
-	hashed := h2.Sum(nil)
-	arr := strings.Split(args[5], ",")
-	m.SetString(arr[0], 10) //大于int64的数字要用到SetString函数
-	n.SetString(arr[1], 10)
-	rr = &m
-	ss = &n
-	result := ecdsa.Verify(pub, hashed, rr, ss)
-	if result != true {
-		return shim.Error("ECDSA Verification failed")
-	}
+	//pub := cert.PublicKey.(*ecdsa.PublicKey)
+	//h2 := sha256.New()
+	//h2.Write([]byte(args[0]))
+	//hashed := h2.Sum(nil)
+	//arr := strings.Split(args[5], ",")
+	//m.SetString(arr[0], 10) //大于int64的数字要用到SetString函数
+	//n.SetString(arr[1], 10)
+	//rr = &m
+	//ss = &n
+	//result := ecdsa.Verify(pub, hashed, rr, ss)
+	//if result != true {
+	//	return shim.Error("ECDSA Verification failed")
+	//}
 
-	certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
-	if certStart == -1 {
-		return shim.Error("No certificate found")
-	}
-	certText := creatorByte[certStart:]
-	bl, _ := pem.Decode(certText)
-	if bl == nil {
-		return shim.Error("Could not decode the PEM structure")
-	}
+	//certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
+	//if certStart == -1 {
+	//	return shim.Error("No certificate found")
+	//}
+	//certText := creatorByte[certStart:]
+	//bl, _ := pem.Decode(certText)
+	//if bl == nil {
+	//	return shim.Error("Could not decode the PEM structure")
+	//}
 
 	uname := cert.Subject.CommonName
 
@@ -266,8 +267,8 @@ func (s *SmartContract) onsiteAudit(APIstub shim.ChaincodeStubInterface, args []
 		return shim.Error("Incorrect number of arguments. Expecting 2")
 	}
 	//验证签名
-	var m, n big.Int
-	var rr, ss *big.Int
+	//var m, n big.Int
+	//var rr, ss *big.Int
 	creatorByte, _ := APIstub.GetCreator()
 	block, _ := pem.Decode(creatorByte)
 	if block == nil {
@@ -277,29 +278,29 @@ func (s *SmartContract) onsiteAudit(APIstub shim.ChaincodeStubInterface, args []
 	if err != nil {
 		return shim.Error("x509 parse err!")
 	}
-	pub := cert.PublicKey.(*ecdsa.PublicKey)
-	h2 := sha256.New()
-	h2.Write([]byte(args[0]))
-	hashed := h2.Sum(nil)
-	arr := strings.Split(args[5], ",")
-	m.SetString(arr[0], 10) //大于int64的数字要用到SetString函数
-	n.SetString(arr[1], 10)
-	rr = &m
-	ss = &n
-	result := ecdsa.Verify(pub, hashed, rr, ss)
-	if result != true {
-		return shim.Error("ECDSA Verification failed")
-	}
-
-	certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
-	if certStart == -1 {
-		return shim.Error("No certificate found")
-	}
-	certText := creatorByte[certStart:]
-	bl, _ := pem.Decode(certText)
-	if bl == nil {
-		return shim.Error("Could not decode the PEM structure")
-	}
+	//pub := cert.PublicKey.(*ecdsa.PublicKey)
+	//h2 := sha256.New()
+	//h2.Write([]byte(args[0]))
+	//hashed := h2.Sum(nil)
+	//arr := strings.Split(args[5], ",")
+	//m.SetString(arr[0], 10) //大于int64的数字要用到SetString函数
+	//n.SetString(arr[1], 10)
+	//rr = &m
+	//ss = &n
+	//result := ecdsa.Verify(pub, hashed, rr, ss)
+	//if result != true {
+	//	return shim.Error("ECDSA Verification failed")
+	//}
+	//
+	//certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
+	//if certStart == -1 {
+	//	return shim.Error("No certificate found")
+	//}
+	//certText := creatorByte[certStart:]
+	//bl, _ := pem.Decode(certText)
+	//if bl == nil {
+	//	return shim.Error("Could not decode the PEM structure")
+	//}
 
 	uname := cert.Subject.CommonName
 
@@ -318,8 +319,8 @@ func (s *SmartContract) certUpload(APIstub shim.ChaincodeStubInterface, args []s
 		return shim.Error("Incorrect number of arguments. Expecting 4")
 	}
 	//验证签名
-	var m, n big.Int
-	var rr, ss *big.Int
+	//var m, n big.Int
+	//var rr, ss *big.Int
 	creatorByte, _ := APIstub.GetCreator()
 	block, _ := pem.Decode(creatorByte)
 	if block == nil {
@@ -329,19 +330,19 @@ func (s *SmartContract) certUpload(APIstub shim.ChaincodeStubInterface, args []s
 	if err != nil {
 		return shim.Error("x509 parse err!")
 	}
-	pub := cert.PublicKey.(*ecdsa.PublicKey)
-	h2 := sha256.New()
-	h2.Write([]byte(args[2]))
-	hashed := h2.Sum(nil)
-	arr := strings.Split(args[3], ",")
-	m.SetString(arr[0], 10) //大于int64的数字要用到SetString函数
-	n.SetString(arr[1], 10)
-	rr = &m
-	ss = &n
-	result := ecdsa.Verify(pub, hashed, rr, ss)
-	if result != true {
-		return shim.Error("ECDSA Verification failed")
-	}
+	//pub := cert.PublicKey.(*ecdsa.PublicKey)
+	//h2 := sha256.New()
+	//h2.Write([]byte(args[2]))
+	//hashed := h2.Sum(nil)
+	//arr := strings.Split(args[3], ",")
+	//m.SetString(arr[0], 10) //大于int64的数字要用到SetString函数
+	//n.SetString(arr[1], 10)
+	//rr = &m
+	//ss = &n
+	//result := ecdsa.Verify(pub, hashed, rr, ss)
+	//if result != true {
+	//	return shim.Error("ECDSA Verification failed")
+	//}
 	uname := cert.Subject.CommonName
 	userAsBytes, _ := APIstub.GetState(uname)
 	user := model.User{}
@@ -361,8 +362,8 @@ func (s *SmartContract) testDataUpload(APIstub shim.ChaincodeStubInterface, args
 		return shim.Error("Incorrect number of arguments. Expecting 4")
 	}
 	//验证签名
-	var m, n big.Int
-	var rr, ss *big.Int
+	//var m, n big.Int
+	//var rr, ss *big.Int
 	creatorByte, _ := APIstub.GetCreator()
 	block, _ := pem.Decode(creatorByte)
 	if block == nil {
@@ -372,19 +373,19 @@ func (s *SmartContract) testDataUpload(APIstub shim.ChaincodeStubInterface, args
 	if err != nil {
 		return shim.Error("x509 parse err!")
 	}
-	pub := cert.PublicKey.(*ecdsa.PublicKey)
-	h2 := sha256.New()
-	h2.Write([]byte(args[2]))
-	hashed := h2.Sum(nil)
-	arr := strings.Split(args[3], ",")
-	m.SetString(arr[0], 10) //大于int64的数字要用到SetString函数
-	n.SetString(arr[1], 10)
-	rr = &m
-	ss = &n
-	result := ecdsa.Verify(pub, hashed, rr, ss)
-	if result != true {
-		return shim.Error("ECDSA Verification failed")
-	}
+	//pub := cert.PublicKey.(*ecdsa.PublicKey)
+	//h2 := sha256.New()
+	//h2.Write([]byte(args[2]))
+	//hashed := h2.Sum(nil)
+	//arr := strings.Split(args[3], ",")
+	//m.SetString(arr[0], 10) //大于int64的数字要用到SetString函数
+	//n.SetString(arr[1], 10)
+	//rr = &m
+	//ss = &n
+	//result := ecdsa.Verify(pub, hashed, rr, ss)
+	//if result != true {
+	//	return shim.Error("ECDSA Verification failed")
+	//}
 	uname := cert.Subject.CommonName
 	userAsBytes, _ := APIstub.GetState(uname)
 	user := model.User{}
@@ -404,8 +405,8 @@ func (s *SmartContract) trialRunDataUpload(APIstub shim.ChaincodeStubInterface, 
 		return shim.Error("Incorrect number of arguments. Expecting 4")
 	}
 	//验证签名
-	var m, n big.Int
-	var rr, ss *big.Int
+	//var m, n big.Int
+	//var rr, ss *big.Int
 	creatorByte, _ := APIstub.GetCreator()
 	block, _ := pem.Decode(creatorByte)
 	if block == nil {
@@ -415,19 +416,19 @@ func (s *SmartContract) trialRunDataUpload(APIstub shim.ChaincodeStubInterface, 
 	if err != nil {
 		return shim.Error("x509 parse err!")
 	}
-	pub := cert.PublicKey.(*ecdsa.PublicKey)
-	h2 := sha256.New()
-	h2.Write([]byte(args[2]))
-	hashed := h2.Sum(nil)
-	arr := strings.Split(args[3], ",")
-	m.SetString(arr[0], 10) //大于int64的数字要用到SetString函数
-	n.SetString(arr[1], 10)
-	rr = &m
-	ss = &n
-	result := ecdsa.Verify(pub, hashed, rr, ss)
-	if result != true {
-		return shim.Error("ECDSA Verification failed")
-	}
+	//pub := cert.PublicKey.(*ecdsa.PublicKey)
+	//h2 := sha256.New()
+	//h2.Write([]byte(args[2]))
+	//hashed := h2.Sum(nil)
+	//arr := strings.Split(args[3], ",")
+	//m.SetString(arr[0], 10) //大于int64的数字要用到SetString函数
+	//n.SetString(arr[1], 10)
+	//rr = &m
+	//ss = &n
+	//result := ecdsa.Verify(pub, hashed, rr, ss)
+	//if result != true {
+	//	return shim.Error("ECDSA Verification failed")
+	//}
 
 	uname := cert.Subject.CommonName
 	userAsBytes, _ := APIstub.GetState(uname)
