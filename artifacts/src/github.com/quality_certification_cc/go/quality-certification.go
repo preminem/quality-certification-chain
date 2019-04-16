@@ -150,6 +150,7 @@ func (s *SmartContract) userLogout(APIstub shim.ChaincodeStubInterface) sc.Respo
 
 	userAsBytes, _ := APIstub.GetState(uname)
 	user := model.User{}
+	json.Unmarshal(userAsBytes, &user)
 	user.State = 2
 	userAsBytes, _ = json.Marshal(user)
 	APIstub.PutState(uname, userAsBytes)
@@ -207,6 +208,7 @@ func (s *SmartContract) certApplication(APIstub shim.ChaincodeStubInterface, arg
 
 	userAsBytes, _ := APIstub.GetState(uname)
 	user := model.User{}
+	json.Unmarshal(userAsBytes, &user)
 	certApp := model.CertApplication{BaseData: args[0], ApplyScanHASH: args[1], LegalPersonScanHASH: args[2],
 		Summary: args[3], EncryptedSummary: args[4]}
 	user.CertApplications = append(user.CertApplications, &certApp)
@@ -266,6 +268,8 @@ func (s *SmartContract) docAudit(APIstub shim.ChaincodeStubInterface, args []str
 
 	userAsBytes, _ := APIstub.GetState(uname)
 	user := model.User{}
+	json.Unmarshal(userAsBytes, &user)
+
 	certApp := model.DocAudit{BaseData: args[0], EncryptedSummary: args[1]}
 	user.DocAudits = append(user.DocAudits, &certApp)
 	userAsBytes, _ = json.Marshal(user)
