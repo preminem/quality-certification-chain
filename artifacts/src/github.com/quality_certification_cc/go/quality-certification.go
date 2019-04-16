@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	sc "github.com/hyperledger/fabric/protos/peer"
-	"github.com/quality_certification_cc/go/model"
-	//"github.com/preminem/quality-certification-chain/artifacts/src/github.com/quality_certification_cc/go/model"
+	//"github.com/quality_certification_cc/go/model"
+	"github.com/preminem/quality-certification-chain/artifacts/src/github.com/quality_certification_cc/go/model"
 	//"math/big"
 	//"strings"
 )
@@ -164,15 +164,23 @@ func (s *SmartContract) certApplication(APIstub shim.ChaincodeStubInterface, arg
 	//验证签名
 	//var m, n big.Int
 	//var rr, ss *big.Int
+	//提取证书
 	creatorByte, _ := APIstub.GetCreator()
-	block, _ := pem.Decode(creatorByte)
-	if block == nil {
-		return shim.Error("block nil!")
+	certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
+	if certStart == -1 {
+		return shim.Error("No certificate found")
 	}
-	cert, err := x509.ParseCertificate(block.Bytes)
+	certText := creatorByte[certStart:]
+	//提取用户身份
+	bl, _ := pem.Decode(certText)
+	if bl == nil {
+		return shim.Error("Could not decode the PEM structure")
+	}
+	cert, err := x509.ParseCertificate(bl.Bytes)
 	if err != nil {
-		return shim.Error("x509 parse err!")
+		return shim.Error("ParseCertificate failed")
 	}
+	uname := cert.Subject.CommonName
 	//pub := cert.PublicKey.(*ecdsa.PublicKey)
 	//h2 := sha256.New()
 	//h2.Write([]byte(args[0]))
@@ -196,8 +204,6 @@ func (s *SmartContract) certApplication(APIstub shim.ChaincodeStubInterface, arg
 	//if bl == nil {
 	//	return shim.Error("Could not decode the PEM structure")
 	//}
-
-	uname := cert.Subject.CommonName
 
 	userAsBytes, _ := APIstub.GetState(uname)
 	user := model.User{}
@@ -217,15 +223,23 @@ func (s *SmartContract) docAudit(APIstub shim.ChaincodeStubInterface, args []str
 	//验证签名
 	//var m, n big.Int
 	//var rr, ss *big.Int
+	//提取证书
 	creatorByte, _ := APIstub.GetCreator()
-	block, _ := pem.Decode(creatorByte)
-	if block == nil {
-		return shim.Error("block nil!")
+	certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
+	if certStart == -1 {
+		return shim.Error("No certificate found")
 	}
-	cert, err := x509.ParseCertificate(block.Bytes)
+	certText := creatorByte[certStart:]
+	//提取用户身份
+	bl, _ := pem.Decode(certText)
+	if bl == nil {
+		return shim.Error("Could not decode the PEM structure")
+	}
+	cert, err := x509.ParseCertificate(bl.Bytes)
 	if err != nil {
-		return shim.Error("x509 parse err!")
+		return shim.Error("ParseCertificate failed")
 	}
+	uname := cert.Subject.CommonName
 	//pub := cert.PublicKey.(*ecdsa.PublicKey)
 	//h2 := sha256.New()
 	//h2.Write([]byte(args[0]))
@@ -250,8 +264,6 @@ func (s *SmartContract) docAudit(APIstub shim.ChaincodeStubInterface, args []str
 	//	return shim.Error("Could not decode the PEM structure")
 	//}
 
-	uname := cert.Subject.CommonName
-
 	userAsBytes, _ := APIstub.GetState(uname)
 	user := model.User{}
 	certApp := model.DocAudit{BaseData: args[0], EncryptedSummary: args[1]}
@@ -269,15 +281,23 @@ func (s *SmartContract) onsiteAudit(APIstub shim.ChaincodeStubInterface, args []
 	//验证签名
 	//var m, n big.Int
 	//var rr, ss *big.Int
+	//提取证书
 	creatorByte, _ := APIstub.GetCreator()
-	block, _ := pem.Decode(creatorByte)
-	if block == nil {
-		return shim.Error("block nil!")
+	certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
+	if certStart == -1 {
+		return shim.Error("No certificate found")
 	}
-	cert, err := x509.ParseCertificate(block.Bytes)
+	certText := creatorByte[certStart:]
+	//提取用户身份
+	bl, _ := pem.Decode(certText)
+	if bl == nil {
+		return shim.Error("Could not decode the PEM structure")
+	}
+	cert, err := x509.ParseCertificate(bl.Bytes)
 	if err != nil {
-		return shim.Error("x509 parse err!")
+		return shim.Error("ParseCertificate failed")
 	}
+	uname := cert.Subject.CommonName
 	//pub := cert.PublicKey.(*ecdsa.PublicKey)
 	//h2 := sha256.New()
 	//h2.Write([]byte(args[0]))
@@ -302,8 +322,6 @@ func (s *SmartContract) onsiteAudit(APIstub shim.ChaincodeStubInterface, args []
 	//	return shim.Error("Could not decode the PEM structure")
 	//}
 
-	uname := cert.Subject.CommonName
-
 	userAsBytes, _ := APIstub.GetState(uname)
 	user := model.User{}
 	certApp := model.OnsiteAudit{BaseData: args[0], EncryptedSummary: args[1]}
@@ -322,14 +340,21 @@ func (s *SmartContract) certUpload(APIstub shim.ChaincodeStubInterface, args []s
 	//var m, n big.Int
 	//var rr, ss *big.Int
 	creatorByte, _ := APIstub.GetCreator()
-	block, _ := pem.Decode(creatorByte)
-	if block == nil {
-		return shim.Error("block nil!")
+	certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
+	if certStart == -1 {
+		return shim.Error("No certificate found")
 	}
-	cert, err := x509.ParseCertificate(block.Bytes)
+	certText := creatorByte[certStart:]
+	//提取用户身份
+	bl, _ := pem.Decode(certText)
+	if bl == nil {
+		return shim.Error("Could not decode the PEM structure")
+	}
+	cert, err := x509.ParseCertificate(bl.Bytes)
 	if err != nil {
-		return shim.Error("x509 parse err!")
+		return shim.Error("ParseCertificate failed")
 	}
+	uname := cert.Subject.CommonName
 	//pub := cert.PublicKey.(*ecdsa.PublicKey)
 	//h2 := sha256.New()
 	//h2.Write([]byte(args[2]))
@@ -343,7 +368,6 @@ func (s *SmartContract) certUpload(APIstub shim.ChaincodeStubInterface, args []s
 	//if result != true {
 	//	return shim.Error("ECDSA Verification failed")
 	//}
-	uname := cert.Subject.CommonName
 	userAsBytes, _ := APIstub.GetState(uname)
 	user := model.User{}
 	json.Unmarshal(userAsBytes, &user)
@@ -365,14 +389,21 @@ func (s *SmartContract) testDataUpload(APIstub shim.ChaincodeStubInterface, args
 	//var m, n big.Int
 	//var rr, ss *big.Int
 	creatorByte, _ := APIstub.GetCreator()
-	block, _ := pem.Decode(creatorByte)
-	if block == nil {
-		return shim.Error("block nil!")
+	certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
+	if certStart == -1 {
+		return shim.Error("No certificate found")
 	}
-	cert, err := x509.ParseCertificate(block.Bytes)
+	certText := creatorByte[certStart:]
+	//提取用户身份
+	bl, _ := pem.Decode(certText)
+	if bl == nil {
+		return shim.Error("Could not decode the PEM structure")
+	}
+	cert, err := x509.ParseCertificate(bl.Bytes)
 	if err != nil {
-		return shim.Error("x509 parse err!")
+		return shim.Error("ParseCertificate failed")
 	}
+	uname := cert.Subject.CommonName
 	//pub := cert.PublicKey.(*ecdsa.PublicKey)
 	//h2 := sha256.New()
 	//h2.Write([]byte(args[2]))
@@ -386,7 +417,6 @@ func (s *SmartContract) testDataUpload(APIstub shim.ChaincodeStubInterface, args
 	//if result != true {
 	//	return shim.Error("ECDSA Verification failed")
 	//}
-	uname := cert.Subject.CommonName
 	userAsBytes, _ := APIstub.GetState(uname)
 	user := model.User{}
 	json.Unmarshal(userAsBytes, &user)
@@ -408,14 +438,21 @@ func (s *SmartContract) trialRunDataUpload(APIstub shim.ChaincodeStubInterface, 
 	//var m, n big.Int
 	//var rr, ss *big.Int
 	creatorByte, _ := APIstub.GetCreator()
-	block, _ := pem.Decode(creatorByte)
-	if block == nil {
-		return shim.Error("block nil!")
+	certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
+	if certStart == -1 {
+		return shim.Error("No certificate found")
 	}
-	cert, err := x509.ParseCertificate(block.Bytes)
+	certText := creatorByte[certStart:]
+	//提取用户身份
+	bl, _ := pem.Decode(certText)
+	if bl == nil {
+		return shim.Error("Could not decode the PEM structure")
+	}
+	cert, err := x509.ParseCertificate(bl.Bytes)
 	if err != nil {
-		return shim.Error("x509 parse err!")
+		return shim.Error("ParseCertificate failed")
 	}
+	uname := cert.Subject.CommonName
 	//pub := cert.PublicKey.(*ecdsa.PublicKey)
 	//h2 := sha256.New()
 	//h2.Write([]byte(args[2]))
@@ -429,8 +466,6 @@ func (s *SmartContract) trialRunDataUpload(APIstub shim.ChaincodeStubInterface, 
 	//if result != true {
 	//	return shim.Error("ECDSA Verification failed")
 	//}
-
-	uname := cert.Subject.CommonName
 	userAsBytes, _ := APIstub.GetState(uname)
 	user := model.User{}
 	json.Unmarshal(userAsBytes, &user)
