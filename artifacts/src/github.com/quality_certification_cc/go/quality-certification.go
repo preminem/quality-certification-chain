@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	sc "github.com/hyperledger/fabric/protos/peer"
-	//"github.com/quality_certification_cc/go/model"
-	"github.com/preminem/quality-certification-chain/artifacts/src/github.com/quality_certification_cc/go/model"
+	"github.com/quality_certification_cc/go/model"
+	//"github.com/preminem/quality-certification-chain/artifacts/src/github.com/quality_certification_cc/go/model"
 	//"math/big"
 	//"strings"
 )
@@ -324,6 +324,8 @@ func (s *SmartContract) onsiteAudit(APIstub shim.ChaincodeStubInterface, args []
 
 	userAsBytes, _ := APIstub.GetState(uname)
 	user := model.User{}
+	json.Unmarshal(userAsBytes, &user)
+
 	certApp := model.OnsiteAudit{BaseData: args[0], EncryptedSummary: args[1]}
 	user.OnsiteAudits = append(user.OnsiteAudits, &certApp)
 	userAsBytes, _ = json.Marshal(user)
