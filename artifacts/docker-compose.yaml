@@ -17,6 +17,7 @@ services:
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
       - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/ad0d0adb32e60bb0dde5161aff31284719359c72079302bd1f07b0e11d03afc1_sk
+      - GODEBUG=netdns=go
     ports:
       - "7054:7054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
@@ -34,6 +35,7 @@ services:
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem
       - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/445500d5a3608efe7c45ae821605b39c09fbeafc559f648e8dcd549f0ddfc0d7_sk
+      - GODEBUG=netdns=go
     ports:
       - "8054:7054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
@@ -51,6 +53,7 @@ services:
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org3.example.com-cert.pem
       - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/47c51ab4e2df81048365aa883fb1bfe52514cdaacd19cbecb7ebebc5f87912b1_sk
+      - GODEBUG=netdns=go
     ports:
       - "9054:7054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
@@ -72,6 +75,7 @@ services:
       - ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/crypto/orderer/tls/server.key
       - ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/crypto/orderer/tls/server.crt
       - ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/crypto/orderer/tls/ca.crt, /etc/hyperledger/crypto/peerOrg1/tls/ca.crt, /etc/hyperledger/crypto/peerOrg2/tls/ca.crt, /etc/hyperledger/crypto/peerOrg3/tls/ca.crt]
+      - GODEBUG=netdns=go
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderers
     command: orderer
     ports:
@@ -98,6 +102,7 @@ services:
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb1:5984
       - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=
       - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=
+      - GODEBUG=netdns=go
     ports:
       - 7051:7051
       - 7053:7053
@@ -122,6 +127,7 @@ services:
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb2:5984
       - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=
       - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=
+      - GODEBUG=netdns=go
     ports:
       - 8051:7051
       - 8053:7053
@@ -146,6 +152,7 @@ services:
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb3:5984
       - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=
       - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=
+      - GODEBUG=netdns=go
     ports:
       - 9051:7051
       - 9053:7053
@@ -163,6 +170,7 @@ services:
     environment:
       - COUCHDB_USER=
       - COUCHDB_PASSWORD=
+      - GODEBUG=netdns=go
     ports:
       - 5984:5984
     networks:
@@ -176,6 +184,7 @@ services:
     environment:
       - COUCHDB_USER=
       - COUCHDB_PASSWORD=
+      - GODEBUG=netdns=go
     ports:
       - 5989:5984
     networks:
@@ -189,6 +198,7 @@ services:
     environment:
       - COUCHDB_USER=
       - COUCHDB_PASSWORD=
+      - GODEBUG=netdns=go
     ports:
       - 5994:5984
     networks:
