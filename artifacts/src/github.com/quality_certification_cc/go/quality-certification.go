@@ -55,6 +55,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.queryAllCerts(APIstub)
 	} else if function == "queryAllUsers" {
 		return s.queryAllUsers(APIstub)
+	} else if function == "conditionalQuery" {
+		return s.conditionalQuery(APIstub, args)
 	}
 
 	return shim.Error("Invalid Smart Contract function name.")
@@ -497,9 +499,36 @@ func (s *SmartContract) queryCert(APIstub shim.ChaincodeStubInterface, args []st
 	if len(args) != 2 {
 		return shim.Error("Incorrect number of arguments. Expecting 2")
 	}
+	creatorByte, _ := APIstub.GetCreator()
+	certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
+	if certStart == -1 {
+		return shim.Error("No certificate found")
+	}
+	certText := creatorByte[certStart:]
+	bl, _ := pem.Decode(certText)
+	if bl == nil {
+		return shim.Error("Could not decode the PEM structure")
+	}
+
+	cert, err := x509.ParseCertificate(bl.Bytes)
+	if err != nil {
+		return shim.Error("ParseCertificate failed")
+	}
+	uname := cert.Subject.CommonName
+
+	userAsBytes, _ := APIstub.GetState(uname)
+	user := model.User{}
+	json.Unmarshal(userAsBytes, &user)
+
 	key := fmt.Sprintf("%s,%s", args[0], args[1])
-	carAsBytes, _ := APIstub.GetState(key)
-	return shim.Success(carAsBytes)
+	cerAsBytes, _ := APIstub.GetState(key)
+	cer := model.CertificationData{}
+	json.Unmarshal(cerAsBytes, &cer)
+
+	if cer.UnitID != user.UnitNo {
+		return shim.Error("Certificate not belonging to your unit")
+	}
+	return shim.Success(cerAsBytes)
 }
 
 func (s *SmartContract) queryAllUsers(APIstub shim.ChaincodeStubInterface) sc.Response {
@@ -544,7 +573,104 @@ func (s *SmartContract) queryAllUsers(APIstub shim.ChaincodeStubInterface) sc.Re
 }
 
 func (s *SmartContract) queryAllCerts(APIstub shim.ChaincodeStubInterface) sc.Response {
-	var queryString = "{\"selector\":{\"certificateID\":{\"$regex\":\"(?i)\"}}}"
+	creatorByte, _ := APIstub.GetCreator()
+	certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
+	if certStart == -1 {
+		return shim.Error("No certificate found")
+	}
+	certText := creatorByte[certStart:]
+	bl, _ := pem.Decode(certText)
+	if bl == nil {
+		return shim.Error("Could not decode the PEM structure")
+	}
+
+	cert, err := x509.ParseCertificate(bl.Bytes)
+	if err != nil {
+		return shim.Error("ParseCertificate failed")
+	}
+	uname := cert.Subject.CommonName
+
+	userAsBytes, _ := APIstub.GetState(uname)
+	user := model.User{}
+	json.Unmarshal(userAsBytes, &user)
+
+	var queryString string
+	if uname == "Admin" {
+		queryString = "{\"selector\":{\"id\":{\"$regex\":\"(?i)\"}}}"
+	} else {
+		queryString = fmt.Sprintf("{\"selector\":{\"unitID\":\"%s\"}}", user.UnitNo)
+	}
+
+	resultsIterator, err := APIstub.GetQueryResult(queryString)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	defer resultsIterator.Close()
+
+	var buffer bytes.Buffer
+	buffer.WriteString("[")
+
+	bArrayMemberAlreadyWritten := false
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
+		if bArrayMemberAlreadyWritten == true {
+			buffer.WriteString(",")
+		}
+		buffer.WriteString("{\"Key\":")
+		buffer.WriteString("\"")
+		buffer.WriteString(queryResponse.Key)
+		buffer.WriteString("\"")
+
+		buffer.WriteString(", \"Record\":")
+
+		buffer.WriteString(string(queryResponse.Value))
+		buffer.WriteString("}")
+		bArrayMemberAlreadyWritten = true
+	}
+	buffer.WriteString("]")
+
+	fmt.Printf("- allUsers:\n%s\n", buffer.String())
+
+	return shim.Success(buffer.Bytes())
+
+}
+
+func (s *SmartContract) conditionalQuery(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2")
+	}
+
+	creatorByte, _ := APIstub.GetCreator()
+	certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
+	if certStart == -1 {
+		return shim.Error("No certificate found")
+	}
+	certText := creatorByte[certStart:]
+	bl, _ := pem.Decode(certText)
+	if bl == nil {
+		return shim.Error("Could not decode the PEM structure")
+	}
+
+	cert, err := x509.ParseCertificate(bl.Bytes)
+	if err != nil {
+		return shim.Error("ParseCertificate failed")
+	}
+	uname := cert.Subject.CommonName
+
+	userAsBytes, _ := APIstub.GetState(uname)
+	user := model.User{}
+	json.Unmarshal(userAsBytes, &user)
+
+	var queryString string
+	if uname == "Admin" {
+		queryString = fmt.Sprintf("{\"selector\":{\"$and\":[{\"id\":{\"$regex\":\"(?i)\"}},{\"%s\":\"%s\"}}}", args[0], args[1])
+	} else {
+		queryString = fmt.Sprintf("{\"selector\":{\"$and\":[{\"unitID\":\"%s\"},{\"%s\":\"%s\"}}}", user.UnitNo, args[0], args[1])
+	}
 
 	resultsIterator, err := APIstub.GetQueryResult(queryString)
 	if err != nil {
