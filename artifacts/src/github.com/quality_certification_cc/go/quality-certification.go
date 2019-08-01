@@ -57,6 +57,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.queryAllUsers(APIstub)
 	} else if function == "conditionalQuery" {
 		return s.conditionalQuery(APIstub, args)
+	} else if function == "publicQuery" {
+		return s.publicQuery(APIstub, args)
 	}
 
 	return shim.Error("Invalid Smart Contract function name.")
