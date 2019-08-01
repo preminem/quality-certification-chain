@@ -491,7 +491,10 @@ func (s *SmartContract) queryUser(APIstub shim.ChaincodeStubInterface, args []st
 	if len(args) != 1 {
 		return shim.Error("Incorrect number of arguments. Expecting 1")
 	}
-	userAsBytes, _ := APIstub.GetState(args[0])
+	userAsBytes, err := APIstub.GetState(args[0])
+	if err != nil {
+		return shim.Error("Certificate doesn't exist!")
+	}
 	return shim.Success(userAsBytes)
 }
 
@@ -516,7 +519,10 @@ func (s *SmartContract) queryCert(APIstub shim.ChaincodeStubInterface, args []st
 	}
 	uname := cert.Subject.CommonName
 
-	userAsBytes, _ := APIstub.GetState(uname)
+	userAsBytes, err := APIstub.GetState(uname)
+	if err != nil {
+		return shim.Error("Certificate doesn't exist!")
+	}
 	user := model.User{}
 	json.Unmarshal(userAsBytes, &user)
 
@@ -637,6 +643,60 @@ func (s *SmartContract) queryAllCerts(APIstub shim.ChaincodeStubInterface) sc.Re
 
 	return shim.Success(buffer.Bytes())
 
+}
+
+func (s *SmartContract) publicQuery(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+	if len(args) != 1 {
+		return shim.Error("Incorrect number of arguments. Expecting 1")
+	}
+	creatorByte, _ := APIstub.GetCreator()
+	certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
+	if certStart == -1 {
+		return shim.Error("No certificate found")
+	}
+	certText := creatorByte[certStart:]
+	bl, _ := pem.Decode(certText)
+	if bl == nil {
+		return shim.Error("Could not decode the PEM structure")
+	}
+
+	cert, err := x509.ParseCertificate(bl.Bytes)
+	if err != nil {
+		return shim.Error("ParseCertificate failed")
+	}
+	uname := cert.Subject.CommonName
+
+	userAsBytes, _ := APIstub.GetState(uname)
+	user := model.User{}
+	json.Unmarshal(userAsBytes, &user)
+
+	var queryString string
+	if uname == "Admin" {
+		queryString = "{\"selector\":{\"id\":{\"$regex\":\"(?i)\"}}}"
+	} else {
+		queryString = fmt.Sprintf("{\"selector\":{\"unitID\":\"%s\"}}", user.UnitNo)
+	}
+
+	resultsIterator, err := APIstub.GetQueryResult(queryString)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	defer resultsIterator.Close()
+
+	cer := model.CertificationData{}
+
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+		json.Unmarshal(queryResponse.Value, &cer)
+		if cer.UnitID == args[0] {
+			basedataAsBytes, _ := json.Marshal(cer.CertUpload.BaseData)
+			return shim.Success(basedataAsBytes)
+		}
+	}
+	return shim.Error("Certificate doesn't exist!")
 }
 
 func (s *SmartContract) conditionalQuery(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
