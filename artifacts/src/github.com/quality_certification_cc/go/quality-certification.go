@@ -603,7 +603,7 @@ func (s *SmartContract) queryAllCerts(APIstub shim.ChaincodeStubInterface) sc.Re
 	json.Unmarshal(userAsBytes, &user)
 
 	var queryString string
-	if uname == "Admin" {
+	if uname == "Admin@org1.example.com" || uname == "Admin@org2.example.com" || uname == "Admin@org3.example.com" {
 		queryString = "{\"selector\":{\"id\":{\"$regex\":\"(?i)\"}}}"
 	} else {
 		queryString = fmt.Sprintf("{\"selector\":{\"unitID\":\"%s\"}}", user.UnitNo)
@@ -673,7 +673,7 @@ func (s *SmartContract) publicQuery(APIstub shim.ChaincodeStubInterface, args []
 	json.Unmarshal(userAsBytes, &user)
 
 	var queryString string
-	if uname == "Admin" {
+	if uname == "Admin@org1.example.com" || uname == "Admin@org2.example.com" || uname == "Admin@org3.example.com" {
 		queryString = "{\"selector\":{\"id\":{\"$regex\":\"(?i)\"}}}"
 	} else {
 		queryString = fmt.Sprintf("{\"selector\":{\"unitID\":\"%s\"}}", user.UnitNo)
@@ -728,7 +728,7 @@ func (s *SmartContract) conditionalQuery(APIstub shim.ChaincodeStubInterface, ar
 	json.Unmarshal(userAsBytes, &user)
 
 	var queryString string
-	if uname == "Admin" {
+	if uname == "Admin@org1.example.com" || uname == "Admin@org2.example.com" || uname == "Admin@org3.example.com" {
 		queryString = fmt.Sprintf("{\"selector\":{\"$and\":[{\"id\":{\"$regex\":\"(?i)\"}},{\"%s\":\"%s\"}}}", args[0], args[1])
 	} else {
 		queryString = fmt.Sprintf("{\"selector\":{\"$and\":[{\"unitID\":\"%s\"},{\"%s\":\"%s\"}}}", user.UnitNo, args[0], args[1])
