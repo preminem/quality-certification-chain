@@ -382,8 +382,8 @@ func (s *SmartContract) certUpload(APIstub shim.ChaincodeStubInterface, args []s
 	user := model.User{}
 	json.Unmarshal(userAsBytes, &user)
 
-	certUpload := model.CertUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name}
-	var certData = model.CertificationData{CertificateID: args[0], UploadedUnitNo: user.UnitNo, UnitID: args[1], CertUpload: &certUpload}
+	certUpload := model.CertUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name, UploadedUnitNo: user.UnitNo}
+	var certData = model.CertificationData{CertificateID: args[0], UnitID: args[1], CertUpload: &certUpload}
 	certAsBytes, _ := json.Marshal(certData)
 	key := fmt.Sprintf("%s,%s", args[0], args[1])
 	APIstub.PutState(key, certAsBytes)
@@ -440,7 +440,7 @@ func (s *SmartContract) testDataUpload(APIstub shim.ChaincodeStubInterface, args
 	var certData = model.CertificationData{}
 	json.Unmarshal(certAsBytes, &certData)
 
-	testDataUpload := model.TestDataUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name}
+	testDataUpload := model.TestDataUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name, UploadedUnitNo: user.UnitNo}
 	certData.TestDataUpload = &testDataUpload
 	certAsBytes, _ = json.Marshal(certData)
 
@@ -497,7 +497,7 @@ func (s *SmartContract) trialRunDataUpload(APIstub shim.ChaincodeStubInterface, 
 	var certData = model.CertificationData{}
 	json.Unmarshal(certAsBytes, &certData)
 
-	trialRunDataUpload := model.TrialRunDataUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name}
+	trialRunDataUpload := model.TrialRunDataUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name, UploadedUnitNo: user.UnitNo}
 	certData.TrialRunDataUpload = &trialRunDataUpload
 	certAsBytes, _ = json.Marshal(certData)
 
@@ -550,7 +550,7 @@ func (s *SmartContract) queryCert(APIstub shim.ChaincodeStubInterface, args []st
 	cer := model.CertificationData{}
 	json.Unmarshal(cerAsBytes, &cer)
 
-	if cer.UploadedUnitNo != user.UnitNo {
+	if cer.CertUpload.UploadedUnitNo != user.UnitNo {
 		return shim.Error("Certificate not belonging to your unit")
 	}
 	return shim.Success(cerAsBytes)
