@@ -688,6 +688,8 @@ func (s *SmartContract) publicQuery(APIstub shim.ChaincodeStubInterface, args []
 
 	cer := model.CertificationData{}
 	pubData := model.PublicData{}
+
+	var log string
 	for resultsIterator.HasNext() {
 		queryResponse, err := resultsIterator.Next()
 		if err != nil {
@@ -699,6 +701,7 @@ func (s *SmartContract) publicQuery(APIstub shim.ChaincodeStubInterface, args []
 		}
 
 		err = json.Unmarshal([]byte(cer.CertUpload.BaseData), &pubData)
+
 		if err != nil {
 			return shim.Error(err.Error())
 		}
@@ -706,9 +709,11 @@ func (s *SmartContract) publicQuery(APIstub shim.ChaincodeStubInterface, args []
 		if pubData.CertificateID == args[0] && pubData.UnitName == args[1] && pubData.PlatformName == args[2] {
 			basedataAsBytes, _ := json.Marshal(pubData)
 			return shim.Success(basedataAsBytes)
+		} else {
+			log += " string:" + cer.CertUpload.BaseData + " cerID:" + pubData.CertificateID + " uName:" + pubData.UnitName + " pName:" + pubData.PlatformName
 		}
 	}
-	return shim.Error("Certificate doesn't exist!")
+	return shim.Error("Certificate doesn't exist! " + log)
 }
 
 func (s *SmartContract) conditionalQuery(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
