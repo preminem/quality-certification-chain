@@ -619,11 +619,14 @@ func (s *SmartContract) queryAllCerts(APIstub shim.ChaincodeStubInterface) sc.Re
 	user := model.User{}
 	json.Unmarshal(userAsBytes, &user)
 
+	flag := ""
 	var queryString string
 	if uname == "Admin" {
 		queryString = "{\"selector\":{\"certificateID\":{\"$regex\":\"(?i)\"}}}"
+		flag = "is Admin"
 	} else {
 		queryString = fmt.Sprintf("{\"selector\":{\"uploadedUnitNo\":\"%s\"}}", user.UnitNo)
+		flag = "not Admin"
 	}
 
 	resultsIterator, err := APIstub.GetQueryResult(queryString)
@@ -636,7 +639,9 @@ func (s *SmartContract) queryAllCerts(APIstub shim.ChaincodeStubInterface) sc.Re
 	buffer.WriteString("[")
 
 	bArrayMemberAlreadyWritten := false
+	i := 0
 	for resultsIterator.HasNext() {
+		i++
 		queryResponse, err := resultsIterator.Next()
 		if err != nil {
 			return shim.Error(err.Error())
@@ -656,6 +661,9 @@ func (s *SmartContract) queryAllCerts(APIstub shim.ChaincodeStubInterface) sc.Re
 		buffer.WriteString("}")
 		bArrayMemberAlreadyWritten = true
 	}
+	if i == 0 {
+		return shim.Error(fmt.Sprintf("Dont have this certs,your name is %s, %s", uname, flag))
+	}
 	buffer.WriteString("]")
 
 	fmt.Printf("- allUsers:\n%s\n", buffer.String())
@@ -670,7 +678,7 @@ func (s *SmartContract) publicQuery(APIstub shim.ChaincodeStubInterface, args []
 	}
 
 	var queryString string
-	queryString = "{\"selector\":{\"CertificateID\":{\"$regex\":\"(?i)\"}}}"
+	queryString = "{\"selector\":{\"certificateID\":{\"$regex\":\"(?i)\"}}}"
 
 	resultsIterator, err := APIstub.GetQueryResult(queryString)
 	if err != nil {
