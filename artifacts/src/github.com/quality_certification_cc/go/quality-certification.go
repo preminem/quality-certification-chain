@@ -383,7 +383,7 @@ func (s *SmartContract) certUpload(APIstub shim.ChaincodeStubInterface, args []s
 	json.Unmarshal(userAsBytes, &user)
 
 	certUpload := model.CertUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name}
-	var certData = model.CertificationData{CertificateID: args[0], UnitID: args[1], CertUpload: &certUpload}
+	var certData = model.CertificationData{CertificateID: args[0], UploadedUnitNo: user.UnitNo, UnitID: args[1], CertUpload: &certUpload}
 	certAsBytes, _ := json.Marshal(certData)
 	key := fmt.Sprintf("%s,%s", args[0], args[1])
 	APIstub.PutState(key, certAsBytes)
@@ -427,14 +427,23 @@ func (s *SmartContract) testDataUpload(APIstub shim.ChaincodeStubInterface, args
 	//if result != true {
 	//	return shim.Error("ECDSA Verification failed")
 	//}
+
 	userAsBytes, _ := APIstub.GetState(uname)
 	user := model.User{}
 	json.Unmarshal(userAsBytes, &user)
 
-	certUpload := model.TestDataUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name}
-	var certData = model.CertificationData{CertificateID: args[0], UnitID: args[1], TestDataUpload: &certUpload}
-	certAsBytes, _ := json.Marshal(certData)
 	key := fmt.Sprintf("%s,%s", args[0], args[1])
+	certAsBytes, err := APIstub.GetState(key)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	var certData = model.CertificationData{}
+	json.Unmarshal(certAsBytes, &certData)
+
+	testDataUpload := model.TestDataUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name}
+	certData.TestDataUpload = &testDataUpload
+	certAsBytes, _ = json.Marshal(certData)
+
 	APIstub.PutState(key, certAsBytes)
 	return shim.Success(nil)
 
@@ -480,10 +489,18 @@ func (s *SmartContract) trialRunDataUpload(APIstub shim.ChaincodeStubInterface, 
 	user := model.User{}
 	json.Unmarshal(userAsBytes, &user)
 
-	certUpload := model.TrialRunDataUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name}
-	var certData = model.CertificationData{CertificateID: args[0], UnitID: args[1], TrialRunDataUpload: &certUpload}
-	certAsBytes, _ := json.Marshal(certData)
 	key := fmt.Sprintf("%s,%s", args[0], args[1])
+	certAsBytes, err := APIstub.GetState(key)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	var certData = model.CertificationData{}
+	json.Unmarshal(certAsBytes, &certData)
+
+	trialRunDataUpload := model.TrialRunDataUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name}
+	certData.TrialRunDataUpload = &trialRunDataUpload
+	certAsBytes, _ = json.Marshal(certData)
+
 	APIstub.PutState(key, certAsBytes)
 	return shim.Success(nil)
 
@@ -533,7 +550,7 @@ func (s *SmartContract) queryCert(APIstub shim.ChaincodeStubInterface, args []st
 	cer := model.CertificationData{}
 	json.Unmarshal(cerAsBytes, &cer)
 
-	if cer.UnitID != user.UnitNo {
+	if cer.UploadedUnitNo != user.UnitNo {
 		return shim.Error("Certificate not belonging to your unit")
 	}
 	return shim.Success(cerAsBytes)
@@ -606,7 +623,7 @@ func (s *SmartContract) queryAllCerts(APIstub shim.ChaincodeStubInterface) sc.Re
 	if uname == "Admin@org1.example.com" || uname == "Admin@org2.example.com" || uname == "Admin@org3.example.com" {
 		queryString = "{\"selector\":{\"id\":{\"$regex\":\"(?i)\"}}}"
 	} else {
-		queryString = fmt.Sprintf("{\"selector\":{\"unitID\":\"%s\"}}", user.UnitNo)
+		queryString = fmt.Sprintf("{\"selector\":{\"uploadedUnitNo\":\"%s\"}}", user.UnitNo)
 	}
 
 	resultsIterator, err := APIstub.GetQueryResult(queryString)
@@ -648,8 +665,8 @@ func (s *SmartContract) queryAllCerts(APIstub shim.ChaincodeStubInterface) sc.Re
 }
 
 func (s *SmartContract) publicQuery(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
-	if len(args) != 1 {
-		return shim.Error("Incorrect number of arguments. Expecting 1")
+	if len(args) != 3 {
+		return shim.Error("Incorrect number of arguments. Expecting 3")
 	}
 	creatorByte, _ := APIstub.GetCreator()
 	certStart := bytes.IndexAny(creatorByte, "-----BEGIN")
@@ -673,11 +690,7 @@ func (s *SmartContract) publicQuery(APIstub shim.ChaincodeStubInterface, args []
 	json.Unmarshal(userAsBytes, &user)
 
 	var queryString string
-	if uname == "Admin@org1.example.com" || uname == "Admin@org2.example.com" || uname == "Admin@org3.example.com" {
-		queryString = "{\"selector\":{\"id\":{\"$regex\":\"(?i)\"}}}"
-	} else {
-		queryString = fmt.Sprintf("{\"selector\":{\"unitID\":\"%s\"}}", user.UnitNo)
-	}
+	queryString = "{\"selector\":{\"id\":{\"$regex\":\"(?i)\"}}}"
 
 	resultsIterator, err := APIstub.GetQueryResult(queryString)
 	if err != nil {
@@ -686,15 +699,18 @@ func (s *SmartContract) publicQuery(APIstub shim.ChaincodeStubInterface, args []
 	defer resultsIterator.Close()
 
 	cer := model.CertificationData{}
-
+	pubData := model.PublicData{}
 	for resultsIterator.HasNext() {
 		queryResponse, err := resultsIterator.Next()
 		if err != nil {
 			return shim.Error(err.Error())
 		}
 		json.Unmarshal(queryResponse.Value, &cer)
-		if cer.UnitID == args[0] {
-			basedataAsBytes, _ := json.Marshal(cer.CertUpload.BaseData)
+
+		json.Unmarshal([]byte(cer.CertUpload.BaseData), &pubData)
+
+		if pubData.CertificateID == args[0] && pubData.UnitName == args[1] && pubData.PlatformName == args[2] {
+			basedataAsBytes, _ := json.Marshal(pubData)
 			return shim.Success(basedataAsBytes)
 		}
 	}
@@ -731,7 +747,7 @@ func (s *SmartContract) conditionalQuery(APIstub shim.ChaincodeStubInterface, ar
 	if uname == "Admin@org1.example.com" || uname == "Admin@org2.example.com" || uname == "Admin@org3.example.com" {
 		queryString = fmt.Sprintf("{\"selector\":{\"$and\":[{\"id\":{\"$regex\":\"(?i)\"}},{\"%s\":\"%s\"}}}", args[0], args[1])
 	} else {
-		queryString = fmt.Sprintf("{\"selector\":{\"$and\":[{\"unitID\":\"%s\"},{\"%s\":\"%s\"}}}", user.UnitNo, args[0], args[1])
+		queryString = fmt.Sprintf("{\"selector\":{\"$and\":[{\"uploadedUnitNo\":\"%s\"},{\"%s\":\"%s\"}}}", user.UnitNo, args[0], args[1])
 	}
 
 	resultsIterator, err := APIstub.GetQueryResult(queryString)

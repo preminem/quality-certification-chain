@@ -43,6 +43,7 @@ type OnsiteAudit struct {
 type CertificationData struct {
 	CertificateID      string              `json:"certificateID"`
 	UnitID             string              `json:"unitID"`
+	UploadedUnitNo     string              `json:"uploadedUnitNo"` //上传者机构编号
 	CertUpload         *CertUpload         `json:"certUpload"`
 	TestDataUpload     *TestDataUpload     `json:"testDataUpload"`
 	TrialRunDataUpload *TrialRunDataUpload `json:"trialRunDataUpload"`
@@ -73,4 +74,12 @@ type TrialRunDataUpload struct {
 	EncryptedSummary string `json:"encryptedSummary"`
 	PostPersonID     string `json:"postPersonID"`
 	PostPersonName   string `json:"postPersonName"`
+}
+
+type PublicData struct {
+	CertificateID      string `json:"certificateID"`
+	UnitName           string `json:"unitName"`           //机构名称
+	PlatformName       string `json:"platformName"`       //交易平台名称
+	CertificationClass string `json:"certificationClass"` //认证级别
+	ValidityTerm       string `json:"validityTerm"`       //有效期至
 }
