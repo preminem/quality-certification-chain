@@ -685,9 +685,15 @@ func (s *SmartContract) publicQuery(APIstub shim.ChaincodeStubInterface, args []
 		if err != nil {
 			return shim.Error(err.Error())
 		}
-		json.Unmarshal(queryResponse.Value, &cer)
+		err = json.Unmarshal(queryResponse.Value, &cer)
+		if err != nil {
+			return shim.Error(err.Error())
+		}
 
-		json.Unmarshal([]byte(cer.CertUpload.BaseData), &pubData)
+		err = json.Unmarshal([]byte(cer.CertUpload.BaseData), &pubData)
+		if err != nil {
+			return shim.Error(err.Error())
+		}
 
 		if pubData.CertificateID == args[0] && pubData.UnitName == args[1] && pubData.PlatformName == args[2] {
 			basedataAsBytes, _ := json.Marshal(pubData)
