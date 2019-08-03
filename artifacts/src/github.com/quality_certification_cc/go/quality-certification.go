@@ -620,7 +620,7 @@ func (s *SmartContract) queryAllCerts(APIstub shim.ChaincodeStubInterface) sc.Re
 	json.Unmarshal(userAsBytes, &user)
 
 	var queryString string
-	if uname == "Admin@org1.example.com" || uname == "Admin@org2.example.com" || uname == "Admin@org3.example.com" {
+	if uname == "Admin" {
 		queryString = "{\"selector\":{\"CertificateID\":{\"$regex\":\"(?i)\"}}}"
 	} else {
 		queryString = fmt.Sprintf("{\"selector\":{\"uploadedUnitNo\":\"%s\"}}", user.UnitNo)
@@ -724,7 +724,7 @@ func (s *SmartContract) conditionalQuery(APIstub shim.ChaincodeStubInterface, ar
 	json.Unmarshal(userAsBytes, &user)
 
 	var queryString string
-	if uname == "Admin@org1.example.com" || uname == "Admin@org2.example.com" || uname == "Admin@org3.example.com" {
+	if uname == "Admin" {
 		queryString = fmt.Sprintf("{\"selector\":{\"$and\":[{\"id\":{\"$regex\":\"(?i)\"}},{\"%s\":\"%s\"}}}", args[0], args[1])
 	} else {
 		queryString = fmt.Sprintf("{\"selector\":{\"$and\":[{\"uploadedUnitNo\":\"%s\"},{\"%s\":\"%s\"}}}", user.UnitNo, args[0], args[1])
