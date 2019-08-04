@@ -756,7 +756,7 @@ func (s *SmartContract) conditionalQuery(APIstub shim.ChaincodeStubInterface, ar
 	if uname == "Admin" {
 		queryString = fmt.Sprintf("{\"selector\":{\"$and\":[{\"certificateID\":{\"$regex\":\"(?i)\"}},{\"%s\":\"%s\"}}}", args[0], args[1])
 	} else {
-		queryString = fmt.Sprintf("{\"selector\":{\"$and\":[{\"uploadedUnitNo\":\"%s\"},{\"%s\":\"%s\"}}}", user.UnitNo, args[0], args[1])
+		queryString = fmt.Sprintf("{\"selector\":{\"$or\": [{\"certUnitNo\":\"%s\"},{\"testUnitNo\":\"%s\"},{\"trialUnitNo\":\"%s\"}]}}", user.UnitNo, user.UnitNo, user.UnitNo)
 	}
 
 	resultsIterator, err := APIstub.GetQueryResult(queryString)
