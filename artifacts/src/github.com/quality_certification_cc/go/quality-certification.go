@@ -382,10 +382,18 @@ func (s *SmartContract) certUpload(APIstub shim.ChaincodeStubInterface, args []s
 	user := model.User{}
 	json.Unmarshal(userAsBytes, &user)
 
-	certUpload := model.CertUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name, UploadedUnitNo: user.UnitNo}
-	var certData = model.CertificationData{CertificateID: args[0], UnitID: args[1], CertUpload: &certUpload}
-	certAsBytes, _ := json.Marshal(certData)
 	key := fmt.Sprintf("%s,%s", args[0], args[1])
+	certAsBytes, err := APIstub.GetState(key)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	var certData = model.CertificationData{}
+	json.Unmarshal(certAsBytes, &certData)
+
+	certUpload := model.CertUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name}
+	certData = model.CertificationData{CertificateID: args[0], UnitID: args[1], CertUpload: &certUpload, CertUnitNo: user.UnitNo}
+	certAsBytes, _ = json.Marshal(certData)
+
 	APIstub.PutState(key, certAsBytes)
 	return shim.Success(nil)
 
@@ -440,8 +448,9 @@ func (s *SmartContract) testDataUpload(APIstub shim.ChaincodeStubInterface, args
 	var certData = model.CertificationData{}
 	json.Unmarshal(certAsBytes, &certData)
 
-	testDataUpload := model.TestDataUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name, UploadedUnitNo: user.UnitNo}
+	testDataUpload := model.TestDataUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name}
 	certData.TestDataUpload = &testDataUpload
+	certData.TestUnitNo = user.UnitNo
 	certAsBytes, _ = json.Marshal(certData)
 
 	APIstub.PutState(key, certAsBytes)
@@ -497,8 +506,9 @@ func (s *SmartContract) trialRunDataUpload(APIstub shim.ChaincodeStubInterface, 
 	var certData = model.CertificationData{}
 	json.Unmarshal(certAsBytes, &certData)
 
-	trialRunDataUpload := model.TrialRunDataUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name, UploadedUnitNo: user.UnitNo}
+	trialRunDataUpload := model.TrialRunDataUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name}
 	certData.TrialRunDataUpload = &trialRunDataUpload
+	certData.TrialUnitNo = user.UnitNo
 	certAsBytes, _ = json.Marshal(certData)
 
 	APIstub.PutState(key, certAsBytes)
@@ -550,7 +560,7 @@ func (s *SmartContract) queryCert(APIstub shim.ChaincodeStubInterface, args []st
 	cer := model.CertificationData{}
 	json.Unmarshal(cerAsBytes, &cer)
 
-	if cer.CertUpload.UploadedUnitNo != user.UnitNo {
+	if cer.CertUnitNo != user.UnitNo || cer.TestUnitNo != user.UnitNo || cer.TrialUnitNo != user.UnitNo {
 		return shim.Error("Certificate not belonging to your unit")
 	}
 	return shim.Success(cerAsBytes)
@@ -625,7 +635,7 @@ func (s *SmartContract) queryAllCerts(APIstub shim.ChaincodeStubInterface) sc.Re
 		queryString = "{\"selector\":{\"certificateID\":{\"$regex\":\"(?i)\"}}}"
 		flag = "is Admin"
 	} else {
-		queryString = fmt.Sprintf("{\"selector\":{\"uploadedUnitNo\":\"%s\"}}", user.UnitNo)
+		queryString = fmt.Sprintf("{\"selector\":{\"$or\": [{\"certUnitNo\":\"%s\"},{\"testUnitNo\":\"%s\"},{\"trialUnitNo\":\"%s\"}]}}", user.UnitNo, user.UnitNo, user.UnitNo)
 		flag = "not Admin"
 	}
 

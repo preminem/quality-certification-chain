@@ -41,8 +41,13 @@ type OnsiteAudit struct {
 }
 
 type CertificationData struct {
-	CertificateID      string              `json:"certificateID"`
-	UnitID             string              `json:"unitID"`
+	CertificateID string `json:"certificateID"`
+	UnitID        string `json:"unitID"`
+
+	CertUnitNo  string `json:"certUnitNo"`  //上传者机构编号
+	TestUnitNo  string `json:"testUnitNo"`  //上传者机构编号
+	TrialUnitNo string `json:"trialUnitNo"` //上传者机构编号
+
 	CertUpload         *CertUpload         `json:"certUpload"`
 	TestDataUpload     *TestDataUpload     `json:"testDataUpload"`
 	TrialRunDataUpload *TrialRunDataUpload `json:"trialRunDataUpload"`
@@ -52,7 +57,6 @@ type CertUpload struct {
 	BaseData string `json:"baseData"`
 	//CertificateID    string `json:"certificateID"`
 	//UnitID           string `json:"unitID"`
-	UploadedUnitNo   string `json:"uploadedUnitNo"` //上传者机构编号
 	EncryptedSummary string `json:"encryptedSummary"`
 	PostPersonID     string `json:"postPersonID"`
 	PostPersonName   string `json:"postPersonName"`
@@ -62,7 +66,6 @@ type TestDataUpload struct {
 	BaseData string `json:"baseData"`
 	//CertificateID    string `json:"certificateID"`
 	//UnitID           string `json:"unitID"`
-	UploadedUnitNo   string `json:"uploadedUnitNo"` //上传者机构编号
 	EncryptedSummary string `json:"encryptedSummary"`
 	PostPersonID     string `json:"postPersonID"`
 	PostPersonName   string `json:"postPersonName"`
@@ -72,7 +75,6 @@ type TrialRunDataUpload struct {
 	BaseData string `json:"baseData"`
 	//CertificateID    string `json:"certificateID"`
 	//UnitID           string `json:"unitID"`
-	UploadedUnitNo   string `json:"uploadedUnitNo"` //上传者机构编号
 	EncryptedSummary string `json:"encryptedSummary"`
 	PostPersonID     string `json:"postPersonID"`
 	PostPersonName   string `json:"postPersonName"`
