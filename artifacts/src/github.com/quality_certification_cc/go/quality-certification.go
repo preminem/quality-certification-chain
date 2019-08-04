@@ -391,7 +391,11 @@ func (s *SmartContract) certUpload(APIstub shim.ChaincodeStubInterface, args []s
 	json.Unmarshal(certAsBytes, &certData)
 
 	certUpload := model.CertUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name}
-	certData = model.CertificationData{CertificateID: args[0], UnitID: args[1], CertUpload: &certUpload, CertUnitNo: user.UnitNo}
+	certData.CertUnitNo = user.UnitNo
+	certData.CertificateID = args[0]
+	certData.UnitID = args[1]
+	certData.CertUpload = &certUpload
+
 	certAsBytes, _ = json.Marshal(certData)
 
 	APIstub.PutState(key, certAsBytes)
@@ -449,6 +453,8 @@ func (s *SmartContract) testDataUpload(APIstub shim.ChaincodeStubInterface, args
 	json.Unmarshal(certAsBytes, &certData)
 
 	testDataUpload := model.TestDataUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name}
+	certData.CertificateID = args[0]
+	certData.UnitID = args[1]
 	certData.TestDataUpload = &testDataUpload
 	certData.TestUnitNo = user.UnitNo
 	certAsBytes, _ = json.Marshal(certData)
@@ -507,6 +513,8 @@ func (s *SmartContract) trialRunDataUpload(APIstub shim.ChaincodeStubInterface, 
 	json.Unmarshal(certAsBytes, &certData)
 
 	trialRunDataUpload := model.TrialRunDataUpload{BaseData: args[2], EncryptedSummary: args[3], PostPersonID: user.Id, PostPersonName: user.Name}
+	certData.CertificateID = args[0]
+	certData.UnitID = args[1]
 	certData.TrialRunDataUpload = &trialRunDataUpload
 	certData.TrialUnitNo = user.UnitNo
 	certAsBytes, _ = json.Marshal(certData)
