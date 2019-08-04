@@ -560,7 +560,7 @@ func (s *SmartContract) queryCert(APIstub shim.ChaincodeStubInterface, args []st
 	cer := model.CertificationData{}
 	json.Unmarshal(cerAsBytes, &cer)
 
-	if cer.CertUnitNo != user.UnitNo || cer.TestUnitNo != user.UnitNo || cer.TrialUnitNo != user.UnitNo {
+	if cer.CertUnitNo != user.UnitNo && cer.TestUnitNo != user.UnitNo && cer.TrialUnitNo != user.UnitNo {
 		return shim.Error("Certificate not belonging to your unit")
 	}
 	return shim.Success(cerAsBytes)
